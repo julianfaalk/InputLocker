@@ -153,7 +153,8 @@ struct ContentView: View {
     }
 
     private func brandedIcon(size: CGFloat, badgeSize: CGFloat) -> some View {
-        Image("MainIcon")
+        let assetName = viewModel.isLocked ? "LockedIcon" : "UnlockedIcon"
+        return Image(assetName)
             .resizable()
             .interpolation(.high)
             .scaledToFit()

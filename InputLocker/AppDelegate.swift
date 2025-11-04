@@ -94,7 +94,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func statusIcon(isLocked: Bool) -> NSImage? {
-        guard let base = NSImage(named: "MainIcon")?.copy() as? NSImage else { return nil }
+        let assetName = isLocked ? "LockedIcon" : "UnlockedIcon"
+        guard let base = NSImage(named: assetName)?.copy() as? NSImage else { return nil }
         let targetSize = NSSize(width: 18, height: 18)
         let badgeSize: CGFloat = 6
         let image = NSImage(size: targetSize)
