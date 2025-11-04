@@ -13,15 +13,17 @@ struct ContentView: View {
         ZStack {
             AngularGradient(
                 gradient: Gradient(colors: [
+                    Color(nsColor: .systemTeal).opacity(0.4),
+                    Color(nsColor: .systemBlue).opacity(0.45),
                     Color(nsColor: .systemIndigo).opacity(0.4),
-                    Color(nsColor: .systemBlue).opacity(0.3),
                     Color(nsColor: .systemPurple).opacity(0.35),
-                    Color(nsColor: .systemTeal).opacity(0.25)
+                    Color(nsColor: .systemPink).opacity(0.3),
+                    Color(nsColor: .systemCyan).opacity(0.4)
                 ]),
                 center: .center
             )
             .ignoresSafeArea()
-
+            
             VStack(alignment: .leading, spacing: 32) {
                 header
                 statusCard
