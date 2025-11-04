@@ -30,6 +30,7 @@ final class ShowcaseWindow: NSWindowController {
 @MainActor
 func startApp() {
     let app = NSApplication.shared
+    app.applicationIconImage = NSImage(named: "MainIcon")
     let blocker = InputBlocker()
     let viewModel = LockViewModel(blocker: blocker)
     let delegate = AppDelegate(blocker: blocker, viewModel: viewModel)

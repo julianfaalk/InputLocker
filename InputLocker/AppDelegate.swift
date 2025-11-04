@@ -34,9 +34,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: viewModel.isLocked ? "lock.fill" : "lock.open.fill", accessibilityDescription: "Input Locker")
-            button.image?.isTemplate = true
-            button.contentTintColor = viewModel.isLocked ? .systemGreen : .systemOrange
+            button.image = statusIcon(isLocked: viewModel.isLocked)
+            button.imagePosition = .imageOnly
+            button.imageScaling = .scaleProportionallyDown
         }
         let menu = NSMenu()
         menu.addItem(withTitle: "Show Window", action: #selector(showcaseAction), keyEquivalent: "")
@@ -86,14 +86,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateIcon(isLocked: Bool) {
-        guard let button = statusItem.button else { return }
-        let symbol = isLocked ? "lock.fill" : "lock.open.fill"
-        button.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Input Locker")
-        button.image?.isTemplate = true
-        button.contentTintColor = isLocked ? .systemGreen : .systemOrange
+        statusItem.button?.image = statusIcon(isLocked: isLocked)
     }
 
     func register(window: ShowcaseWindow) {
         showcaseWindow = window
+    }
+
+    private func statusIcon(isLocked: Bool) -> NSImage? {
+        guard let base = NSImage(named: "MainIcon")?.copy() as? NSImage else { return nil }
+        let targetSize = NSSize(width: 18, height: 18)
+        let badgeSize: CGFloat = 6
+        let image = NSImage(size: targetSize)
+        image.lockFocus()
+        NSGraphicsContext.current?.imageInterpolation = .high
+        base.size = targetSize
+        base.draw(in: NSRect(origin: .zero, size: targetSize))
+
+        let badgeRect = NSRect(
+            x: targetSize.width - badgeSize - 1,
+            y: 1,
+            width: badgeSize,
+            height: badgeSize
+        )
+        (isLocked ? NSColor.systemGreen : NSColor.systemOrange).setFill()
+        NSBezierPath(ovalIn: badgeRect).fill()
+
+        image.unlockFocus()
+        image.isTemplate = false
+        return image
     }
 }

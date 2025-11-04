@@ -37,15 +37,7 @@ struct ContentView: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: 18) {
-            ZStack {
-                Circle()
-                    .fill(Color(nsColor: .systemBlue).opacity(0.15))
-                    .frame(width: 64, height: 64)
-                Image(systemName: viewModel.isLocked ? "lock.fill" : "lock.open.fill")
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(viewModel.isLocked ? .green : .orange)
-                    .id("header-icon-\(viewModel.isLocked)")
-            }
+            brandedIcon(size: 64, badgeSize: 16)
             VStack(alignment: .leading, spacing: 6) {
                 Text("InputLocker")
                     .font(.system(size: 26, weight: .semibold))
@@ -72,8 +64,7 @@ struct ContentView: View {
 
             Button(action: viewModel.toggleLock) {
                 HStack(spacing: 8) {
-                    Image(systemName: viewModel.isLocked ? "lock.fill" : "lock.open.fill")
-                        .id("button-icon-\(viewModel.isLocked)")
+                    brandedIcon(size: 28, badgeSize: 10)
                     Text(viewModel.toggleButtonTitle)
                         .fontWeight(.semibold)
                     Spacer()
@@ -159,6 +150,31 @@ struct ContentView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func brandedIcon(size: CGFloat, badgeSize: CGFloat) -> some View {
+        Image("MainIcon")
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.28, style: .continuous))
+            .shadow(color: .black.opacity(0.12), radius: size * 0.15, x: 0, y: size * 0.08)
+            .overlay(alignment: .bottomTrailing) {
+                lockStateBadge(size: badgeSize)
+            }
+    }
+
+    private func lockStateBadge(size: CGFloat) -> some View {
+        Circle()
+            .fill(viewModel.isLocked ? Color.green : Color.orange)
+            .frame(width: size, height: size)
+            .overlay(
+                Image(systemName: viewModel.isLocked ? "lock.fill" : "lock.open.fill")
+                    .font(.system(size: size * 0.6, weight: .bold))
+                    .foregroundStyle(.white)
+            )
+            .shadow(color: Color.black.opacity(0.25), radius: size * 0.35, x: 0, y: size * 0.15)
     }
 }
 
