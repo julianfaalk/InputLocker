@@ -26,6 +26,8 @@ class InputBlocker {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var safetyTimer: Timer?
+    private var cursorHidden = false
+    private var cursorDetached = false
 
     /// Callback used to mirror state changes to UI components.
     var onLockStateChanged: ((Bool) -> Void)?
@@ -56,6 +58,7 @@ class InputBlocker {
             return
         }
         isLocked = true
+        freezePointer()
         notifyLockStateChanged()
         scheduleSafetyTimer()
     }
@@ -63,6 +66,7 @@ class InputBlocker {
     func unlock() {
         stopEventTap()
         invalidateSafetyTimer()
+        restorePointer()
         isLocked = false
         notifyLockStateChanged()
     }
@@ -93,9 +97,12 @@ class InputBlocker {
         ]
 
         var mask = types.reduce(CGEventMask(0)) { partialResult, type in
-            partialResult | (1 << type.rawValue)
+            partialResult | CGEventMask(UInt64(1) << UInt64(type.rawValue))
         }
-        mask |= CGEventMask(1 << NSEvent.EventType.systemDefined.rawValue)
+        let additionalTypes: [NSEvent.EventType] = [.systemDefined, .swipe, .magnify, .rotate, .gesture]
+        for eventType in additionalTypes {
+            mask |= CGEventMask(UInt64(1) << UInt64(eventType.rawValue))
+        }
 
         let callback: CGEventTapCallBack = { proxy, type, event, userInfo in
             guard let unmanaged = userInfo else { return Unmanaged.passUnretained(event) }
@@ -147,6 +154,27 @@ class InputBlocker {
         }
 
         return nil
+    }
+
+    private func freezePointer() {
+        guard !cursorDetached else { return }
+        if CGAssociateMouseAndMouseCursorPosition(0) == .success {
+            cursorDetached = true
+        }
+        if CGDisplayHideCursor(CGMainDisplayID()) == .success {
+            cursorHidden = true
+        }
+    }
+
+    private func restorePointer() {
+        if cursorDetached {
+            _ = CGAssociateMouseAndMouseCursorPosition(1)
+            cursorDetached = false
+        }
+        if cursorHidden {
+            _ = CGDisplayShowCursor(CGMainDisplayID())
+            cursorHidden = false
+        }
     }
 
     private func isUnlockCombo(event: CGEvent) -> Bool {
